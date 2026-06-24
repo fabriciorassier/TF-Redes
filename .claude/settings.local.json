@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(Start-Process python *)",
+      "Bash(Out-Null)",
+      "Bash(Start-Sleep -Milliseconds 500)",
+      "Bash(python srtp.py --host 127.0.0.1 --port 7000 --file test_input.bin --mode saw)",
+      "PowerShell(Stop-Process *)"
+    ]
+  }
+}

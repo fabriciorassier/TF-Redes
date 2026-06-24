@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<!-- saved from url=(0077)https://moodle.pucrs.br/pluginfile.php/5958817/mod_resource/content/3/T2.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>T2.md</title>
+
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="./T2.md_files/mermaid.min.js.download"></script>
+<style>
+  .imageye-selected {
+    outline: 2px solid black !important;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5) !important;
+  }
+</style></head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<div style="text-align: justify">
+<h1 id="laboratório-de-redes-de-computadores">Laboratório de Redes de Computadores</h1>
+<img src="./T2.md_files/escola-politecnica.png" width="385">
+<h2 id="trabalho-2----protocolo-de-transporte-confiável-sobre-udp">Trabalho 2 -- Protocolo de transporte confiável sobre UDP</h2>
+<h3 id="objetivos">Objetivos</h3>
+<p>Este trabalho tem como objetivo o projeto, implementação e análise de um protocolo de transporte confiável sobre UDP. O protocolo — denominado <strong>SRTP (Simple Reliable Transport Protocol)</strong> — deve ser capaz de transferir arquivos de forma confiável entre dois hosts distintos em uma rede local, implementando mecanismos de controle de erros e de fluxo progressivamente mais sofisticados.</p>
+<p>O trabalho é dividido em duas partes. A Parte 1 cobre as regras gerais do protocolo e a implementação stop-and-wait. A Parte 2 adiciona as implementações com janela deslizante (GBN e SR) e exige análise comparativa entre as três variantes.</p>
+<p>A entrega final consiste em um <strong>relatório técnico</strong> e no <strong>código-fonte</strong> das implementações. Adicionalmente, cada trio participará de um <strong>teste de interoperabilidade</strong> com outro trio durante a aula de apresentação.</p>
+<hr>
+<h2 id="especificação-do-protocolo-srtp">Especificação do Protocolo SRTP</h2>
+<h3 id="camada-de-transporte-subjacente">Camada de transporte subjacente</h3>
+<p>O SRTP opera sobre <strong>UDP</strong>. Toda confiabilidade, controle de fluxo e ordenação são responsabilidade do próprio protocolo, não do sistema operacional.</p>
+<h3 id="modelo-de-comunicação">Modelo de comunicação</h3>
+<p>O SRTP é <strong>half-duplex</strong>: em um dado momento, apenas um lado transmite dados. O lado oposto envia exclusivamente pacotes de controle (ACK, NACK). Não há transmissão simultânea de dados nos dois sentidos.</p>
+<h3 id="formato-do-cabeçalho">Formato do cabeçalho</h3>
+<p>O cabeçalho SRTP possui <strong>9 bytes</strong>, com o seguinte layout:</p>
+<pre class="hljs"><code><div> 0                   1                   2
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|S|F|        SEQ (14 bits)       |A|N|        ACK (14 bits)     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Length (8 bits)      |           CRC32 (32 bits)           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</div></code></pre>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Bits</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SEQ</td>
+<td>14</td>
+<td>Número de sequência do pacote (em pacotes, não em bytes)</td>
+</tr>
+<tr>
+<td>SYN</td>
+<td>1</td>
+<td>Flag de estabelecimento de conexão</td>
+</tr>
+<tr>
+<td>FIN</td>
+<td>1</td>
+<td>Flag de encerramento de conexão</td>
+</tr>
+<tr>
+<td>ACK</td>
+<td>14</td>
+<td>Número de acknowledgement</td>
+</tr>
+<tr>
+<td>ACK flag</td>
+<td>1</td>
+<td>Indica que o campo ACK é válido</td>
+</tr>
+<tr>
+<td>NACK</td>
+<td>1</td>
+<td>Negative acknowledgement</td>
+</tr>
+<tr>
+<td>Length</td>
+<td>8</td>
+<td>Tamanho do payload em bytes; durante o handshake, tamanho de janela proposto</td>
+</tr>
+<tr>
+<td>CRC32</td>
+<td>32</td>
+<td>Checksum CRC32 calculado sobre cabeçalho + payload</td>
+</tr>
+</tbody>
+</table>
+<h3 id="semântica-do-campo-length">Semântica do campo Length</h3>
+<ul>
+<li><strong>Durante a transferência:</strong> número de bytes de payload neste pacote.
+<ul>
+<li><code>Length = 255</code> → pacote intermediário; o receiver bufferiza e aguarda.</li>
+<li><code>Length &lt; 255</code> → último pacote do stream; o receiver entrega o buffer completo à aplicação (<em>push</em>).</li>
+<li><code>Length = 0</code> → edge case: o arquivo é múltiplo exato de 255 bytes; sinaliza fim de stream sem payload residual.</li>
+</ul>
+</li>
+<li><strong>Durante o handshake (pacotes SYN e SYN+ACK):</strong> tamanho de janela proposto pelo lado que envia.</li>
+</ul>
+<h3 id="número-de-sequência">Número de sequência</h3>
+<ul>
+<li>Contado em <strong>pacotes</strong>, não em bytes.</li>
+<li>Inicia em <strong>0</strong> no primeiro pacote de dados após o handshake.</li>
+<li>Espaço de sequência: 14 bits → valores de 0 a 16383. Wrap-around deve ser tratado corretamente.</li>
+<li>Todos os pacotes de dados têm payload de <strong>255 bytes</strong>, exceto o último pacote do stream.</li>
+</ul>
+<h3 id="checksum">Checksum</h3>
+<ul>
+<li>Algoritmo: <strong>CRC32</strong>.</li>
+<li>Calculado sobre o cabeçalho completo (com o campo CRC32 zerado) concatenado com o payload.</li>
+<li>Pacotes com CRC32 inválido devem ser <strong>silenciosamente descartados</strong> pelo receiver — sem envio de NACK. Como o pacote está corrompido, nenhum campo do cabeçalho é confiável, incluindo o SEQ. Sem um SEQ válido, não é possível construir um NACK significativo. O timeout do sender é responsável por disparar a retransmissão.</li>
+</ul>
+<h3 id="estabelecimento-de-conexão-three-way-handshake">Estabelecimento de conexão (three-way handshake)</h3>
+<pre class="hljs"><code><div>Iniciador                        Receiver
+    |                                |
+    |--- SYN (Length=janela_i) ----&gt; |
+    |                                |
+    |&lt;-- SYN+ACK (Length=janela_r) --|
+    |                                |
+    |--- ACK ------------------------|
+    |                                |
+    |   [transferência de dados]     |
+</div></code></pre>
+<ul>
+<li>O iniciador propõe sua janela no campo Length do SYN.</li>
+<li>O receiver responde com sua própria janela no SYN+ACK.</li>
+<li>A janela efetiva da sessão é o <strong>menor</strong> dos dois valores.</li>
+<li>O terceiro passo (ACK) confirma o estabelecimento antes do início da transferência.</li>
+<li>SEQ e ACK são 0 durante o handshake.</li>
+</ul>
+<h3 id="encerramento-de-conexão-two-way">Encerramento de conexão (two-way)</h3>
+<pre class="hljs"><code><div>Sender                           Receiver
+    |                                |
+    |--- FIN (Length=0) -----------&gt; |
+    |                                |
+    |&lt;-- FIN+ACK -------------------|
+    |                                |
+</div></code></pre>
+<ul>
+<li>Iniciado pelo lado que transmitiu os dados, após o último pacote ser confirmado.</li>
+<li>O receiver confirma com FIN+ACK e encerra a sessão.</li>
+</ul>
+<h3 id="timeout-e-retransmissão">Timeout e retransmissão</h3>
+<ul>
+<li>Timeout fixo: <strong>100ms</strong>.</li>
+<li>Em caso de timeout sem ACK, o pacote (ou janela, dependendo da variante) é retransmitido.</li>
+</ul>
+<h3 id="modelo-de-endereçamento-e-portas">Modelo de endereçamento e portas</h3>
+<p>O SRTP utiliza um par de portas simétricas derivado de um único parâmetro <strong>P</strong>:</p>
+<ul>
+<li>Ambos os lados recebem apenas <strong>P</strong> como argumento de porta.</li>
+<li>O lado em modo <strong>listen</strong> (receiver) escuta na porta <strong>P</strong>.</li>
+<li>O lado em modo <strong>connect</strong> (sender) conecta ao receiver na porta <strong>P</strong> e, <strong>somente após o handshake ser concluído</strong>, passa a escutar na porta <strong>P+1</strong> para receber ACKs e NACKs.</li>
+<li>O modo de operação é definido pela presença ou ausência do argumento <code>--listen</code>.</li>
+</ul>
+<p>Exemplo de uso:</p>
+<pre class="hljs"><code><div># Receiver em modo listen na porta 6000
+&lt;executável&gt; --listen --port 6000
+
+# Sender conectando ao receiver (escuta ACKs em 6001, envia para 6000)
+&lt;executável&gt; --host 192.168.1.10 --port 6000 --file arquivo.bin
+</div></code></pre>
+<h3 id="transferência-bidirecional">Transferência bidirecional</h3>
+<p>O SRTP é half-duplex por sessão, mas suporta transferência nas duas direções através de sessões alternadas:</p>
+<ul>
+<li><strong>O iniciador do handshake (quem envia o SYN) é sempre o sender de dados da sessão.</strong></li>
+<li>Para transferir dados na direção oposta, o receiver da sessão anterior inicia uma nova conexão como sender.</li>
+<li>Cada direção exige um handshake e um encerramento independentes.</li>
+</ul>
+<hr>
+<h2 id="parte-1-stop-and-wait">Parte 1: Stop-and-Wait</h2>
+<h3 id="regras-de-implementação">Regras de implementação</h3>
+<p>A primeira implementação do SRTP deve seguir o mecanismo <strong>stop-and-wait</strong>:</p>
+<ul>
+<li>O sender transmite <strong>um pacote por vez</strong>.</li>
+<li>O sender aguarda o ACK do receiver antes de transmitir o próximo pacote.</li>
+<li>Se o ACK não chegar dentro de 100ms, o pacote é retransmitido.</li>
+<li>O receiver deve enviar ACK para cada pacote recebido corretamente (CRC32 válido, SEQ esperado).</li>
+<li>Pacotes com CRC32 inválido são descartados silenciosamente, sem envio de NACK. Ver seção Checksum.</li>
+<li>Pacotes fora de ordem são descartados silenciosamente.</li>
+</ul>
+<h3 id="testes-obrigatórios">Testes obrigatórios</h3>
+<p>Todos os testes devem ser realizados entre <strong>máquinas distintas do trio</strong> e acompanhados de capturas Wireshark (<code>.pcapng</code>).</p>
+<p>Para cada cenário, deve ser transferido um arquivo de tamanho suficiente para gerar no mínimo 50 pacotes de dados.</p>
+<p><strong>Cenários de latência</strong> (sem perda, clumsy no sender ou receiver):</p>
+<table>
+<thead>
+<tr>
+<th>Cenário</th>
+<th>Latência adicionada</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L0</td>
+<td>0ms (baseline)</td>
+</tr>
+<tr>
+<td>L1</td>
+<td>50ms</td>
+</tr>
+<tr>
+<td>L2</td>
+<td>100ms</td>
+</tr>
+<tr>
+<td>L3</td>
+<td>150ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cenários de perda</strong> (sem latência adicional, clumsy no sender ou receiver):</p>
+<table>
+<thead>
+<tr>
+<th>Cenário</th>
+<th>Taxa de perda</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>0% (baseline)</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>1%</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>5%</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>10%</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>25%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="o-que-deve-aparecer-no-relatório">O que deve aparecer no relatório</h3>
+<ol>
+<li>
+<p><strong>Análise do throughput teórico máximo:</strong> calcular a taxa máxima de transferência do stop-and-wait em função do RTT e do tamanho do pacote usando a fórmula de eficiência de protocolos ARQ (ver referência: Seção 3.4 de Kurose &amp; Ross, <em>Redes de Computadores e a Internet: Uma aborgadem top-down</em>). Confrontar o valor teórico com o throughput medido no cenário L0/P0.</p>
+</li>
+<li>
+<p><strong>Análise dos cenários de latência:</strong> para cada cenário L0–L3, reportar o throughput medido e o número de retransmissões. Explicar o comportamento observado em função do timeout de 100ms — especialmente a transição entre L1 e L2, e entre L2 e L3. As capturas Wireshark devem ser usadas como evidência.</p>
+</li>
+<li>
+<p><strong>Análise dos cenários de perda:</strong> para cada cenário P0–P4, reportar o throughput medido e o número de retransmissões. Explicar como a taxa de perda afeta o throughput e relacionar com a fórmula teórica de eficiência sob perda.</p>
+</li>
+<li>
+<p><strong>Análise do comportamento do CRC32:</strong> demonstrar com uma captura que um pacote corrompido é detectado e descartado. Explicar o que aconteceria se o CRC32 não estivesse presente.</p>
+</li>
+</ol>
+<hr>
+<h2 id="parte-2-go-back-n-e-selective-repeat">Parte 2: Go-Back-N e Selective Repeat</h2>
+<h3 id="regras-adicionais">Regras adicionais</h3>
+<p>A Parte 2 exige duas novas implementações do SRTP com janela deslizante: <strong>Go-Back-N (GBN)</strong> e <strong>Selective Repeat (SR)</strong>. Ambas devem reutilizar o mesmo cabeçalho e as mesmas regras de handshake e encerramento definidas na Parte 1.</p>
+<p>O modo de operação do protocolo — stop-and-wait, GBN ou SR — deve ser selecionado por um argumento de linha de comando, por exemplo <code>--mode [saw|gbn|sr]</code>. O mesmo binário deve suportar os três modos.</p>
+<p><strong>Go-Back-N:</strong></p>
+<ul>
+<li>O sender mantém uma janela de até N pacotes em trânsito simultaneamente.</li>
+<li>O receiver aceita apenas pacotes na ordem esperada; pacotes fora de ordem são descartados silenciosamente.</li>
+<li>Em caso de timeout ou NACK, o sender retransmite <strong>todos os pacotes a partir do não confirmado</strong>.</li>
+<li>ACKs são cumulativos: ACK(n) confirma todos os pacotes até n inclusive.</li>
+<li>O campo NACK deve ser usado: o receiver envia NACK com o número do pacote esperado ao receber um pacote fora de ordem.</li>
+</ul>
+<p><strong>Selective Repeat:</strong></p>
+<ul>
+<li>O sender mantém uma janela de até N pacotes em trânsito simultaneamente.</li>
+<li>O receiver aceita e <strong>bufferiza</strong> pacotes fora de ordem dentro da janela.</li>
+<li>Em caso de timeout ou NACK, o sender retransmite <strong>apenas o pacote não confirmado</strong>.</li>
+<li>ACKs são individuais: ACK(n) confirma apenas o pacote n.</li>
+<li>O campo NACK deve ser usado ao detectar uma lacuna: a flag NACK é ativada e o campo ACK carrega o número de sequência do pacote faltante.</li>
+</ul>
+<p><strong>Tamanho máximo de janela (GBN e SR):</strong> limitado a <strong>255 pacotes</strong>, definido pelo campo Length de 8 bits negociado no handshake.</p>
+<h3 id="testes-obrigatórios-1">Testes obrigatórios</h3>
+<p>Os cenários de latência e perda da Parte 1 devem ser <strong>repetidos para GBN e SR</strong>, usando os mesmos parâmetros. Adicionalmente, ambas as implementações devem ser testadas com os seguintes <strong>cenários de reordenação</strong> (sem latência adicional, sem perda):</p>
+<table>
+<thead>
+<tr>
+<th>Cenário</th>
+<th>Taxa de reordenação (clumsy)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R0</td>
+<td>0% (baseline)</td>
+</tr>
+<tr>
+<td>R1</td>
+<td>10%</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>25%</td>
+</tr>
+</tbody>
+</table>
+<p>Para cada implementação, deve ser testado com pelo menos <strong>dois tamanhos de janela distintos</strong> (sugestão: 4 e 16 pacotes).</p>
+<h3 id="o-que-deve-aparecer-no-relatório-1">O que deve aparecer no relatório</h3>
+<ol>
+<li>
+<p><strong>Análise comparativa sob latência:</strong> comparar o throughput de stop-and-wait, GBN e SR nos cenários L0–L3. Explicar por que a janela deslizante muda o impacto da latência no throughput.</p>
+</li>
+<li>
+<p><strong>Análise comparativa sob perda:</strong> comparar o número de retransmissões e o throughput de GBN e SR nos cenários P1–P4. Explicar a diferença de comportamento entre os dois protocolos sob perda e relacionar com o mecanismo de retransmissão de cada um.</p>
+</li>
+<li>
+<p><strong>Análise comparativa sob reordenação:</strong> este é o ponto central da Parte 2. Para cada cenário R0–R2, descrever e comparar o comportamento de GBN e SR. As capturas Wireshark devem mostrar claramente: no GBN, o descarte e a retransmissão em lote após pacotes fora de ordem; no SR, a bufferização e a entrega em ordem após preenchimento de lacunas. Explicar por que os dois protocolos divergem neste cenário.</p>
+</li>
+<li>
+<p><strong>Análise do impacto do tamanho de janela:</strong> para cada protocolo, comparar os resultados obtidos com os dois tamanhos de janela testados. Discutir o trade-off entre janela maior (maior throughput potencial) e janela maior (maior custo de retransmissão no GBN sob perda).</p>
+</li>
+<li>
+<p><strong>Conclusão comparativa:</strong> síntese das três implementações — em quais condições de rede cada uma é mais adequada e por quê. A conclusão deve ser fundamentada nos dados medidos, não apenas na teoria.</p>
+</li>
+</ol>
+<hr>
+<h2 id="teste-de-interoperabilidade">Teste de Interoperabilidade</h2>
+<p>Durante a <strong>segunda aula de apresentação (07/07)</strong>, cada grupo realizará um teste de transmissão com outro grupo, usando as implementações de ambos os grupos. O teste consiste em:</p>
+<ul>
+<li>Sender de um grupo conectando ao receiver do outro grupo, e vice-versa.</li>
+<li>Transferência de um arquivo.</li>
+<li>O teste é considerado bem-sucedido se o arquivo transferido for idêntico ao original (verificado por hash).</li>
+</ul>
+<p>O teste de interoperabilidade avalia a conformidade da implementação com a especificação do protocolo.</p>
+<hr>
+<h2 id="regras-de-entrega">Regras de Entrega</h2>
+<ul>
+<li><strong>Modalidade:</strong> trios indicados no Moodle.</li>
+<li><strong>Formato:</strong> arquivo <code>.zip</code> contendo:
+<ul>
+<li>Código-fonte da implementação (sem binários, arquivos temporários ou de build).</li>
+<li>Arquivo <code>README</code> com instruções de compilação/execução e descrição dos argumentos de linha de comando.</li>
+<li>Diretório <code>capturas/</code> com os arquivos <code>.pcapng</code> de <strong>todos os cenários obrigatórios</strong>, nomeados de acordo com o cenário (ex: <code>saw_L2.pcapng</code>, <code>sr_R2_janela16.pcapng</code>).</li>
+<li>Relatório em PDF, documento único cobrindo Parte 1 e Parte 2.</li>
+</ul>
+</li>
+<li><strong>Data de entrega:</strong> <strong>30/06 até as 21h</strong> (antes do início da aula). Entregas fora do prazo não serão aceitas.</li>
+<li><strong>Primeira apresentação:</strong> 30/06 — cada grupo apresenta o trabalho.</li>
+<li><strong>Teste de interoperabilidade:</strong> 07/07 — segunda aula de apresentação.</li>
+</ul>
+<hr>
+<h2 id="avaliação">Avaliação</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Peso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parte 1 — Implementação stop-and-wait</strong></td>
+<td>20%</td>
+</tr>
+<tr>
+<td>Conformidade com a especificação do protocolo (cabeçalho, handshake, encerramento, CRC32)</td>
+<td>10%</td>
+</tr>
+<tr>
+<td>Funcionamento correto da transferência (sem e com clumsy)</td>
+<td>10%</td>
+</tr>
+<tr>
+<td><strong>Parte 1 — Relatório</strong></td>
+<td>20%</td>
+</tr>
+<tr>
+<td>Análise do throughput teórico vs medido</td>
+<td>7%</td>
+</tr>
+<tr>
+<td>Análise dos cenários de latência com evidência em capturas</td>
+<td>7%</td>
+</tr>
+<tr>
+<td>Análise dos cenários de perda com evidência em capturas</td>
+<td>6%</td>
+</tr>
+<tr>
+<td><strong>Parte 2 — Implementação GBN e SR</strong></td>
+<td>20%</td>
+</tr>
+<tr>
+<td>Conformidade com a especificação (GBN e SR)</td>
+<td>10%</td>
+</tr>
+<tr>
+<td>Funcionamento correto da transferência (sem e com clumsy)</td>
+<td>10%</td>
+</tr>
+<tr>
+<td><strong>Parte 2 — Relatório</strong></td>
+<td>30%</td>
+</tr>
+<tr>
+<td>Análise do throughput teórico vs medido para GBN e SR</td>
+<td>5%</td>
+</tr>
+<tr>
+<td>Análise comparativa sob latência e perda</td>
+<td>8%</td>
+</tr>
+<tr>
+<td>Análise comparativa sob reordenação (com evidência em capturas)</td>
+<td>10%</td>
+</tr>
+<tr>
+<td>Conclusão comparativa fundamentada em dados</td>
+<td>7%</td>
+</tr>
+<tr>
+<td><strong>Teste de interoperabilidade ao vivo</strong></td>
+<td>10%</td>
+</tr>
+<tr>
+<td>Sender do grupo funciona com receiver de outro grupo</td>
+<td>5%</td>
+</tr>
+<tr>
+<td>Receiver do grupo funciona com sender de outro grupo</td>
+<td>5%</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota:</strong> plágio entre grupos ou uso de código gerado por LLM sem compreensão demonstrada na apresentação resultará em nota zero para o grupo.</p>
+</blockquote>
+
+
+
+</div></body></html>
