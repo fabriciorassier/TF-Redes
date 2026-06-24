@@ -38,7 +38,7 @@ def handshake_active(sock_send, sock_recv, host, port, window):
         sock_send.settimeout(TIMEOUT)
         try:
             data, addr = sock_send.recvfrom(HEADER_SIZE + 255)
-        except socket.timeout:
+        except (socket.timeout, ConnectionResetError):
             continue
 
         pkt = parse_packet(data)
@@ -77,7 +77,7 @@ def handshake_passive(sock, window):
             for _ in range(MAX_RETRIES):
                 try:
                     data2, addr2 = sock.recvfrom(HEADER_SIZE + 255)
-                except socket.timeout:
+                except (socket.timeout, ConnectionResetError):
                     sock.sendto(synack, addr)
                     continue
                 pkt2 = parse_packet(data2)

@@ -9,10 +9,13 @@ from packet import make_packet, parse_packet, MAX_PAYLOAD, HEADER_SIZE, seq_add,
 from connection import handshake_active, teardown_active, TIMEOUT
 
 
-def _suppress_icmp_reset(sock):
-    if sys.platform == "win32":
-        SIO_UDP_CONNRESET = -1744830452
-        sock.ioctl(SIO_UDP_CONNRESET, False)
+def _recvfrom_safe(sock, bufsize):
+    """recvfrom that ignores Windows ICMP port-unreachable errors."""
+    while True:
+        try:
+            return sock.recvfrom(bufsize)
+        except ConnectionResetError:
+            return None, None
 
 # ---------------------------------------------------------------------------
 # Stats helper
@@ -69,9 +72,8 @@ def send_saw(sock_data, sock_ack, peer_addr, ack_port, file_data, stats):
             stats.sent += 1
 
             sock_ack.settimeout(TIMEOUT)
-            try:
-                data, _ = sock_ack.recvfrom(HEADER_SIZE + MAX_PAYLOAD)
-            except socket.timeout:
+            data, _ = _recvfrom_safe(sock_ack, HEADER_SIZE + MAX_PAYLOAD)
+            if data is None:
                 stats.retransmissions += 1
                 continue
 
@@ -238,8 +240,8 @@ def run_sender(host, port, filepath, mode, window):
 
     sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock_ack = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    _suppress_icmp_reset(sock_data)
-    _suppress_icmp_reset(sock_ack)
+    sock_data.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock_ack.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock_ack.bind(("", port + 1))
 
     try:

@@ -9,12 +9,13 @@ from packet import make_packet, parse_packet, MAX_PAYLOAD, HEADER_SIZE, seq_add
 from connection import handshake_passive, teardown_passive, TIMEOUT
 
 
-def _suppress_icmp_reset(sock):
-    """On Windows, suppress ICMP port-unreachable errors on UDP sockets."""
-    if sys.platform == "win32":
-        import ctypes
-        SIO_UDP_CONNRESET = -1744830452
-        sock.ioctl(SIO_UDP_CONNRESET, False)
+def _recvfrom_safe(sock, bufsize):
+    """recvfrom that ignores Windows ICMP port-unreachable errors."""
+    while True:
+        try:
+            return sock.recvfrom(bufsize)
+        except ConnectionResetError:
+            return None, None
 
 
 # ---------------------------------------------------------------------------
@@ -34,7 +35,7 @@ def recv_saw(sock, peer_addr, port, output_path):
     while True:
         try:
             data, addr = sock.recvfrom(HEADER_SIZE + MAX_PAYLOAD)
-        except socket.timeout:
+        except (socket.timeout, ConnectionResetError):
             print("[RECEIVER] Timeout waiting for data.")
             return
 
@@ -83,7 +84,7 @@ def recv_gbn(sock, peer_addr, port, output_path):
     while True:
         try:
             data, addr = sock.recvfrom(HEADER_SIZE + MAX_PAYLOAD)
-        except socket.timeout:
+        except (socket.timeout, ConnectionResetError):
             print("[RECEIVER] Timeout waiting for data.")
             return
 
@@ -131,7 +132,7 @@ def recv_sr(sock, peer_addr, port, output_path, window_size):
     while True:
         try:
             data, addr = sock.recvfrom(HEADER_SIZE + MAX_PAYLOAD)
-        except socket.timeout:
+        except (socket.timeout, ConnectionResetError):
             print("[RECEIVER] Timeout waiting for data.")
             return
 
@@ -187,7 +188,7 @@ def _wait_for_fin(sock, ack_target):
     for _ in range(50):
         try:
             data, addr = sock.recvfrom(HEADER_SIZE + MAX_PAYLOAD)
-        except socket.timeout:
+        except (socket.timeout, ConnectionResetError):
             return
         parsed = parse_packet(data)
         if parsed is None:
@@ -205,7 +206,7 @@ def _wait_for_fin(sock, ack_target):
 
 def run_receiver(port, output_path, mode, window):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    _suppress_icmp_reset(sock)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("", port))
 
     try:
