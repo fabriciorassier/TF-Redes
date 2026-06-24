@@ -3,20 +3,30 @@ SRTP receiver — Stop-and-Wait, Go-Back-N, Selective Repeat.
 """
 
 import socket
+import sys
 import time
 from packet import make_packet, parse_packet, MAX_PAYLOAD, HEADER_SIZE, seq_add
 from connection import handshake_passive, teardown_passive, TIMEOUT
+
+
+def _suppress_icmp_reset(sock):
+    """On Windows, suppress ICMP port-unreachable errors on UDP sockets."""
+    if sys.platform == "win32":
+        import ctypes
+        SIO_UDP_CONNRESET = -1744830452
+        sock.ioctl(SIO_UDP_CONNRESET, False)
 
 
 # ---------------------------------------------------------------------------
 # Stop-and-Wait
 # ---------------------------------------------------------------------------
 
-def recv_saw(sock, peer_addr, output_path):
+def recv_saw(sock, peer_addr, port, output_path):
     """
-    Stop-and-Wait receiver. Delivers full file once last packet arrives.
-    peer_addr: (host, port+1) — where to send ACKs.
+    Stop-and-Wait receiver.
+    peer_addr: sender's (host, ephemeral) from handshake — we use peer_addr[0] + port+1 for ACKs.
     """
+    ack_target = (peer_addr[0], port + 1)
     buffer = bytearray()
     expected_seq = 0
     sock.settimeout(TIMEOUT * 100)
@@ -36,9 +46,8 @@ def recv_saw(sock, peer_addr, output_path):
         syn, fin, seq, ack_flag, nack, ack_num, length, payload = parsed
 
         if fin == 1:
-            # Teardown initiated
             finack = make_packet(fin=1, ack_flag=1)
-            sock.sendto(finack, addr)
+            sock.sendto(finack, ack_target)
             print("[RECEIVER] FIN received, connection closed.")
             break
 
@@ -48,19 +57,15 @@ def recv_saw(sock, peer_addr, output_path):
 
         buffer.extend(payload[:length])
 
-        # Send ACK
         ack_pkt = make_packet(ack_flag=1, ack=seq)
-        ack_target = (peer_addr[0], peer_addr[1] + 1)
         sock.sendto(ack_pkt, ack_target)
 
         expected_seq = (expected_seq + 1) % (1 << 14)
 
         if length < MAX_PAYLOAD:
-            # Last packet — write file
             _write_output(output_path, buffer)
             print(f"[RECEIVER] File received ({len(buffer)} bytes) -> {output_path}")
-            # Wait for FIN
-            _wait_for_fin(sock, peer_addr)
+            _wait_for_fin(sock, ack_target)
             break
 
 
@@ -68,8 +73,9 @@ def recv_saw(sock, peer_addr, output_path):
 # Go-Back-N
 # ---------------------------------------------------------------------------
 
-def recv_gbn(sock, peer_addr, output_path):
+def recv_gbn(sock, peer_addr, port, output_path):
     """Go-Back-N receiver — accepts only in-order packets."""
+    ack_target = (peer_addr[0], port + 1)
     buffer = bytearray()
     expected_seq = 0
     sock.settimeout(TIMEOUT * 100)
@@ -89,11 +95,9 @@ def recv_gbn(sock, peer_addr, output_path):
 
         if fin == 1:
             finack = make_packet(fin=1, ack_flag=1)
-            sock.sendto(finack, addr)
+            sock.sendto(finack, ack_target)
             print("[RECEIVER] FIN received.")
             break
-
-        ack_target = (peer_addr[0], peer_addr[1] + 1)
 
         if seq == expected_seq:
             buffer.extend(payload[:length])
@@ -104,10 +108,9 @@ def recv_gbn(sock, peer_addr, output_path):
             if length < MAX_PAYLOAD:
                 _write_output(output_path, buffer)
                 print(f"[RECEIVER] File received ({len(buffer)} bytes) -> {output_path}")
-                _wait_for_fin(sock, peer_addr)
+                _wait_for_fin(sock, ack_target)
                 break
         else:
-            # Out of order: send NACK with expected SEQ
             nack_pkt = make_packet(ack_flag=1, nack=1, ack=expected_seq)
             sock.sendto(nack_pkt, ack_target)
 
@@ -116,8 +119,9 @@ def recv_gbn(sock, peer_addr, output_path):
 # Selective Repeat
 # ---------------------------------------------------------------------------
 
-def recv_sr(sock, peer_addr, output_path, window_size):
+def recv_sr(sock, peer_addr, port, output_path, window_size):
     """Selective Repeat receiver — buffers out-of-order packets."""
+    ack_target = (peer_addr[0], port + 1)
     recv_buffer = {}   # seq -> (payload, length)
     base_seq = 0
     assembled = bytearray()
@@ -139,21 +143,17 @@ def recv_sr(sock, peer_addr, output_path, window_size):
 
         if fin == 1:
             finack = make_packet(fin=1, ack_flag=1)
-            sock.sendto(finack, addr)
+            sock.sendto(finack, ack_target)
             print("[RECEIVER] FIN received.")
             break
-
-        ack_target = (peer_addr[0], peer_addr[1] + 1)
 
         # Accept if within window [base_seq, base_seq + window_size)
         offset = (seq - base_seq) % (1 << 14)
         if offset < window_size:
             recv_buffer[seq] = (payload[:length], length)
-            # Individual ACK
             ack_pkt = make_packet(ack_flag=1, ack=seq)
             sock.sendto(ack_pkt, ack_target)
 
-            # Deliver contiguous packets starting from base_seq
             while base_seq in recv_buffer:
                 pl, ln = recv_buffer.pop(base_seq)
                 assembled.extend(pl)
@@ -164,10 +164,9 @@ def recv_sr(sock, peer_addr, output_path, window_size):
             if finished:
                 _write_output(output_path, assembled)
                 print(f"[RECEIVER] File received ({len(assembled)} bytes) -> {output_path}")
-                _wait_for_fin(sock, peer_addr)
+                _wait_for_fin(sock, ack_target)
                 break
         else:
-            # Outside window: send NACK for base_seq (the gap)
             nack_pkt = make_packet(ack_flag=1, nack=1, ack=base_seq)
             sock.sendto(nack_pkt, ack_target)
 
@@ -182,8 +181,8 @@ def _write_output(path, data):
             f.write(data)
 
 
-def _wait_for_fin(sock, peer_addr):
-    """After file received, wait for sender's FIN and reply FIN+ACK."""
+def _wait_for_fin(sock, ack_target):
+    """After file received, wait for sender's FIN and reply FIN+ACK to ack_target."""
     sock.settimeout(TIMEOUT * 20)
     for _ in range(50):
         try:
@@ -196,7 +195,7 @@ def _wait_for_fin(sock, peer_addr):
         syn, fin, seq, ack_flag, nack, ack_num, length, payload = parsed
         if fin == 1:
             finack = make_packet(fin=1, ack_flag=1)
-            sock.sendto(finack, addr)
+            sock.sendto(finack, ack_target)
             return
 
 
@@ -206,6 +205,7 @@ def _wait_for_fin(sock, peer_addr):
 
 def run_receiver(port, output_path, mode, window):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    _suppress_icmp_reset(sock)
     sock.bind(("", port))
 
     try:
@@ -214,11 +214,11 @@ def run_receiver(port, output_path, mode, window):
         print(f"[RECEIVER] Handshake complete with {peer_addr}. Negotiated window={negotiated_window}")
 
         if mode == "saw":
-            recv_saw(sock, peer_addr, output_path)
+            recv_saw(sock, peer_addr, port, output_path)
         elif mode == "gbn":
-            recv_gbn(sock, peer_addr, output_path)
+            recv_gbn(sock, peer_addr, port, output_path)
         elif mode == "sr":
-            recv_sr(sock, peer_addr, output_path, negotiated_window)
+            recv_sr(sock, peer_addr, port, output_path, negotiated_window)
 
     finally:
         sock.close()

@@ -3,9 +3,16 @@ SRTP sender — Stop-and-Wait, Go-Back-N, Selective Repeat.
 """
 
 import socket
+import sys
 import time
 from packet import make_packet, parse_packet, MAX_PAYLOAD, HEADER_SIZE, seq_add, seq_lt, seq_le
 from connection import handshake_active, teardown_active, TIMEOUT
+
+
+def _suppress_icmp_reset(sock):
+    if sys.platform == "win32":
+        SIO_UDP_CONNRESET = -1744830452
+        sock.ioctl(SIO_UDP_CONNRESET, False)
 
 # ---------------------------------------------------------------------------
 # Stats helper
@@ -231,6 +238,8 @@ def run_sender(host, port, filepath, mode, window):
 
     sock_data = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock_ack = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    _suppress_icmp_reset(sock_data)
+    _suppress_icmp_reset(sock_ack)
     sock_ack.bind(("", port + 1))
 
     try:
@@ -248,7 +257,7 @@ def run_sender(host, port, filepath, mode, window):
         elif mode == "sr":
             send_sr(sock_data, sock_ack, peer_addr, port + 1, file_data, negotiated_window, stats)
 
-        teardown_active(sock_data, peer_addr)
+        teardown_active(sock_data, sock_ack, peer_addr)
         print("[SENDER] Transfer complete.")
         stats.report()
 

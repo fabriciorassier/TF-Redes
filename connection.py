@@ -92,14 +92,14 @@ def handshake_passive(sock, window):
             raise ConnectionError("Handshake failed: no final ACK")
 
 
-def teardown_active(sock, peer_addr):
-    """Sender sends FIN, waits for FIN+ACK."""
+def teardown_active(sock_send, sock_recv, peer_addr):
+    """Sender sends FIN (via sock_send to peer), waits for FIN+ACK on sock_recv (P+1)."""
     fin_pkt = make_packet(fin=1, length=0)
     for _ in range(MAX_RETRIES):
-        sock.sendto(fin_pkt, peer_addr)
-        sock.settimeout(TIMEOUT)
+        sock_send.sendto(fin_pkt, peer_addr)
+        sock_recv.settimeout(TIMEOUT)
         try:
-            data, _ = sock.recvfrom(HEADER_SIZE + 255)
+            data, _ = sock_recv.recvfrom(HEADER_SIZE + 255)
         except socket.timeout:
             continue
         pkt = parse_packet(data)
