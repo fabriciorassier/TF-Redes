@@ -1,0 +1,3 @@
+[RECEIVER] Listening on port 8000, mode=saw, window=4
+[RECEIVER] Handshake complete with ('127.0.0.1', 51783). Negotiated window=4
+[RECEIVER] File received (12767 bytes) -> received_test.bin
