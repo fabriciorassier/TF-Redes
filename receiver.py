@@ -104,7 +104,9 @@ def recv_gbn(sock, peer_addr, port, output_path):
             print("[RECEIVER] FIN received.")
             break
 
-        if seq == expected_seq:
+        diff = (seq - expected_seq) % (1 << 14)
+        if diff == 0:
+            # In-order: accept and ACK
             buffer.extend(payload[:length])
             ack_pkt = make_packet(ack_flag=1, ack=seq)
             sock.sendto(ack_pkt, ack_target)
@@ -115,7 +117,13 @@ def recv_gbn(sock, peer_addr, port, output_path):
                 print(f"[RECEIVER] File received ({len(buffer)} bytes) -> {output_path}")
                 _wait_for_fin(sock, ack_target)
                 break
+        elif diff > (1 << 13):
+            # Duplicate (behind expected_seq): re-ACK last in-order packet
+            last_acked = (expected_seq - 1) % (1 << 14)
+            ack_pkt = make_packet(ack_flag=1, ack=last_acked)
+            sock.sendto(ack_pkt, ack_target)
         else:
+            # Out-of-order (ahead of expected_seq): send NACK
             nack_pkt = make_packet(ack_flag=1, nack=1, ack=expected_seq)
             sock.sendto(nack_pkt, ack_target)
 
@@ -171,7 +179,12 @@ def recv_sr(sock, peer_addr, port, output_path, window_size):
                 print(f"[RECEIVER] File received ({len(assembled)} bytes) -> {output_path}")
                 _wait_for_fin(sock, ack_target)
                 break
+        elif offset >= (1 << 14) - window_size:
+            # Duplicate (behind base_seq): re-ACK to help sender advance
+            ack_pkt = make_packet(ack_flag=1, ack=seq)
+            sock.sendto(ack_pkt, ack_target)
         else:
+            # Outside window (too far ahead): NACK
             nack_pkt = make_packet(ack_flag=1, nack=1, ack=base_seq)
             sock.sendto(nack_pkt, ack_target)
 

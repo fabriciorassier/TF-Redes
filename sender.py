@@ -108,11 +108,9 @@ def send_gbn(sock_data, sock_ack, peer_addr, ack_port, file_data, window_size, s
     """Go-Back-N sender."""
     chunks = list(_chunk_file(file_data))
     total = len(chunks)
-    base = 0       # oldest unacknowledged packet index
-    next_seq_idx = 0  # next packet to send (index into chunks)
-    seq_base = 0   # SEQ number of base
+    base = 0
+    next_idx = 0
 
-    # pre-build packets
     packets = []
     seq = 0
     for payload, length in chunks:
@@ -120,46 +118,42 @@ def send_gbn(sock_data, sock_ack, peer_addr, ack_port, file_data, window_size, s
         stats.bytes_data += length
         seq = (seq + 1) % (1 << 14)
 
-    send_times = {}  # base_idx -> time of last send
+    send_time = [None] * total
     sock_ack.settimeout(0.01)
 
     while base < total:
-        # Send packets within window
-        while next_seq_idx < total and next_seq_idx < base + window_size:
-            pkt, _ = packets[next_seq_idx]
+        # Fill window with new packets
+        while next_idx < total and next_idx < base + window_size:
+            pkt, _ = packets[next_idx]
             sock_data.sendto(pkt, peer_addr)
             stats.sent += 1
-            if next_seq_idx == base:
-                send_times[base] = time.time()
-            next_seq_idx += 1
+            send_time[next_idx] = time.time()
+            next_idx += 1
 
-        # Try to receive ACK
+        # Try to receive ACK or NACK
         try:
             data, _ = sock_ack.recvfrom(HEADER_SIZE + MAX_PAYLOAD)
             parsed = parse_packet(data)
             if parsed is not None:
                 _, _, _, ack_flag, nack_flag, ack_num, _, _ = parsed
-                if ack_flag == 1:
+                if nack_flag:
+                    # NACK: retransmit entire window from base
+                    stats.retransmissions += max(0, next_idx - base)
+                    next_idx = base
+                elif ack_flag:
                     # Cumulative ACK: advance base to ack_num+1
-                    ack_idx = ack_num  # SEQ == index since seq starts at 0
-                    # Handle wrap-around: find actual index
                     new_base = _seq_to_idx(ack_num, base, window_size, total)
                     if new_base is not None and new_base >= base:
                         base = new_base + 1
-                        seq_base = (ack_num + 1) % (1 << 14)
-                        send_times[base] = time.time()
-                elif nack_flag == 1:
-                    # Retransmit from base
-                    next_seq_idx = base
-                    stats.retransmissions += (next_seq_idx - base)
         except socket.timeout:
             pass
 
-        # Check timeout on base packet
-        if base in send_times and (time.time() - send_times[base]) > TIMEOUT:
-            next_seq_idx = base
-            send_times[base] = time.time()
-            stats.retransmissions += min(window_size, total - base)
+        # Timeout on base: retransmit entire window
+        if base < total and send_time[base] is not None and (time.time() - send_time[base]) > TIMEOUT:
+            stats.retransmissions += max(0, next_idx - base)
+            next_idx = base
+            for i in range(base, min(base + window_size, total)):
+                send_time[i] = None
 
 
 def _seq_to_idx(seq_num, base, window_size, total):

@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Arquivos de teste / saída
+received_output.bin
+received_test.bin
+test_input.bin
+recv_out.txt
+recv_err.txt
+
+# Planejamento interno
+image.png
+*.pdf
+
+# Editor / sistema
+.DS_Store
+*.swp
