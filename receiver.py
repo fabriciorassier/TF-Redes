@@ -53,7 +53,11 @@ def recv_saw(sock, peer_addr, port, output_path):
             break
 
         if seq != expected_seq:
-            # Out of order — silent discard (SAW)
+            # Out of order — silent discard (SAW). But if it's the duplicate of the previous
+            # packet, it means the sender lost our ACK. We must re-ACK it!
+            if seq == (expected_seq - 1) % (1 << 14):
+                ack_pkt = make_packet(ack_flag=1, ack=seq)
+                sock.sendto(ack_pkt, ack_target)
             continue
 
         buffer.extend(payload[:length])
@@ -198,6 +202,10 @@ def _wait_for_fin(sock, ack_target):
             finack = make_packet(fin=1, ack_flag=1)
             sock.sendto(finack, ack_target)
             return
+        elif syn == 0:
+            # Duplicate data packet — the sender didn't get our last ACK. Re-ACK it!
+            ack_pkt = make_packet(ack_flag=1, ack=seq)
+            sock.sendto(ack_pkt, ack_target)
 
 
 # ---------------------------------------------------------------------------

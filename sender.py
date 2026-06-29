@@ -49,9 +49,14 @@ class Stats:
 
 def _chunk_file(data):
     """Yields (payload, length) tuples per the SRTP length semantics."""
+    if len(data) == 0:
+        yield b"", 0
+        return
     for i in range(0, len(data), MAX_PAYLOAD):
         chunk = data[i:i + MAX_PAYLOAD]
         yield chunk, len(chunk)
+    if len(data) % MAX_PAYLOAD == 0:
+        yield b"", 0
 
 
 # ---------------------------------------------------------------------------
@@ -72,7 +77,11 @@ def send_saw(sock_data, sock_ack, peer_addr, ack_port, file_data, stats):
             stats.sent += 1
 
             sock_ack.settimeout(TIMEOUT)
-            data, _ = _recvfrom_safe(sock_ack, HEADER_SIZE + MAX_PAYLOAD)
+            try:
+                data, _ = _recvfrom_safe(sock_ack, HEADER_SIZE + MAX_PAYLOAD)
+            except (socket.timeout, TimeoutError):
+                stats.retransmissions += 1
+                continue
             if data is None:
                 stats.retransmissions += 1
                 continue
