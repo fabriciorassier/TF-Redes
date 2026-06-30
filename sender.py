@@ -75,26 +75,31 @@ def send_saw(sock_data, sock_ack, peer_addr, ack_port, file_data, stats):
         while True:
             sock_data.sendto(pkt, peer_addr)
             stats.sent += 1
+            deadline = time.time() + TIMEOUT
+            acked = False
 
-            sock_ack.settimeout(TIMEOUT)
-            try:
-                data, _ = _recvfrom_safe(sock_ack, HEADER_SIZE + MAX_PAYLOAD)
-            except (socket.timeout, TimeoutError):
-                stats.retransmissions += 1
-                continue
-            if data is None:
-                stats.retransmissions += 1
-                continue
+            while True:
+                remaining = deadline - time.time()
+                if remaining <= 0:
+                    break
+                sock_ack.settimeout(max(remaining, 0.001))
+                try:
+                    data, _ = _recvfrom_safe(sock_ack, HEADER_SIZE + MAX_PAYLOAD)
+                except (socket.timeout, TimeoutError):
+                    break
+                if data is None:
+                    continue
+                parsed = parse_packet(data)
+                if parsed is None:
+                    continue
+                _, _, _, ack_flag, nack, ack_num, _, _ = parsed
+                if ack_flag == 1 and ack_num == seq:
+                    acked = True
+                    break
+                # Stale ACK — drain and keep waiting within timeout window
 
-            parsed = parse_packet(data)
-            if parsed is None:
-                stats.retransmissions += 1
-                continue
-
-            _, _, _, ack_flag, nack, ack_num, _, _ = parsed
-            if ack_flag == 1 and ack_num == seq:
+            if acked:
                 break
-            # Wrong ACK or NACK — retransmit
             stats.retransmissions += 1
 
         seq = (seq + 1) % (1 << 14)

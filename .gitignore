@@ -7,6 +7,7 @@ __pycache__/
 received_output.bin
 received_test.bin
 test_input.bin
+arquivo_teste.bin
 recv_out.txt
 recv_err.txt
 
