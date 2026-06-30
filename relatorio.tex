@@ -4,6 +4,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
 \usepackage[top=3cm, bottom=2cm, left=3cm, right=2cm]{geometry}
 \usepackage{graphicx}
 \usepackage{listings}
@@ -132,7 +134,7 @@ O trabalho foi estruturado em duas etapas principais:
 O código-fonte foi desenvolvido inteiramente em Python e testado sob diversos cenários reais/emulados de rede com latência, perda e reordenação de pacotes.
 
 % ================= SEÇÃO 2: PARTE 1 - STOP-AND-WAIT =================
-\section{Parte 1 — Stop-and-Wait (SAW)}
+\section{Parte 1: Stop-and-Wait (SAW)}
 
 O mecanismo de Stop-and-Wait é a abordagem mais simples para transferência confiável, onde o transmissor envia um único pacote de dados e aguarda a confirmação (ACK) do receptor antes de enviar o próximo. 
 
@@ -257,10 +259,8 @@ Caso o campo CRC32 não estivesse presente no protocolo, o receptor aceitaria da
     \label{fig:saw_wireshark_latencia}
 \end{figure}
 
-\newpage
-
 % ================= SEÇÃO 3: PARTE 2 - GBN E SR =================
-\section{Parte 2 — Janela Deslizante (GBN e SR)}
+\section{Parte 2: Janela Deslizante (GBN e SR)}
 
 Nesta etapa, implementou-se o controle de fluxo por janela deslizante (\textit{Sliding Window}) utilizando as abordagens Go-Back-N (GBN) e Selective Repeat (SR). A negociação do tamanho da janela ($W$) ocorre de forma dinâmica durante o handshake.
 
@@ -293,9 +293,9 @@ O impacto fundamental da janela deslizante está no \textit{pipeline}: enquanto 
 
 Para o cenário L3 (latência de ida 150 ms, $RTT \approx 300$ ms) e $T_{\text{trans}} \approx 0{,}2$ ms:
 \begin{itemize}
-    \item \textbf{SAW} ($W = 1$): $U = \frac{0{,}2}{300{,}2} \approx 0{,}07\%$ — o canal fica ocioso 99,9\% do tempo.
-    \item \textbf{Janela $W = 4$}: $U = \frac{4 \times 0{,}2}{300{,}2} \approx 0{,}27\%$ — 4× melhor, mas ainda muito baixo.
-    \item \textbf{Janela $W = 16$}: $U = \frac{16 \times 0{,}2}{300{,}2} \approx 1{,}06\%$ — 16× melhor que o SAW.
+    \item \textbf{SAW} ($W = 1$): $U = \frac{0{,}2}{300{,}2} \approx 0{,}07\%$, o canal fica ocioso 99,9\% do tempo.
+    \item \textbf{Janela $W = 4$}: $U = \frac{4 \times 0{,}2}{300{,}2} \approx 0{,}27\%$, 4x melhor, mas ainda muito baixo.
+    \item \textbf{Janela $W = 16$}: $U = \frac{16 \times 0{,}2}{300{,}2} \approx 1{,}06\%$, 16x melhor que o SAW.
 \end{itemize}
 
 Para saturar completamente o canal nesse cenário seria necessária uma janela de $W \geq \lceil RTT / T_{\text{trans}} \rceil = \lceil 300 / 0{,}2 \rceil = 1500$ pacotes. Em cenários de latência mais realistas (RTT de poucos milissegundos), janelas de 4 a 16 já são suficientes para atingir utilização próxima de 100\%. Os dados medidos (Tabela~\ref{tab:comparativo_latencia}) confirmam que GBN e SR com $W = 16$ entregam throughput substancialmente superior ao SAW em todos os cenários L1--L3, com a vantagem crescendo proporcionalmente à latência.
@@ -323,7 +323,7 @@ A perda de pacotes impacta de formas muito distintas o GBN (onde uma perda forç
 \\
 A perda de pacotes expõe a diferença fundamental entre GBN e SR no que diz respeito ao custo de retransmissão.
 
-No \textbf{Go-Back-N}, quando um pacote de sequência $n$ é perdido, o receptor descarta \emph{todos} os pacotes seguintes que chegam fora de ordem (mesmo que estejam corretos) e envia NACK para $n$. O transmissor então retransmite $n$ e todos os pacotes após $n$ que ainda estejam dentro da janela — no pior caso, $W$ pacotes para cada perda. Com $W = 16$ e taxa de perda de 25\% (P4), é esperado que ocorra ao menos uma perda por janela, forçando a retransmissão completa da janela a cada ciclo. O número de retransmissões cresce como $O(W \cdot p \cdot \text{total\_pacotes})$.
+No \textbf{Go-Back-N}, quando um pacote de sequência $n$ é perdido, o receptor descarta \emph{todos} os pacotes seguintes que chegam fora de ordem (mesmo que estejam corretos) e envia NACK para $n$. O transmissor então retransmite $n$ e todos os pacotes após $n$ que ainda estejam dentro da janela, no pior caso $W$ pacotes para cada perda. Com $W = 16$ e taxa de perda de 25\% (P4), é esperado que ocorra ao menos uma perda por janela, forçando a retransmissão completa da janela a cada ciclo. O número de retransmissões cresce como $O(W \cdot p \cdot \text{total\_pacotes})$.
 
 No \textbf{Selective Repeat}, o receptor \emph{bufferiza} os pacotes corretos recebidos fora de ordem e envia ACK individual para cada um. Apenas o pacote efetivamente perdido é retransmitido. O custo de retransmissão é proporcional apenas à taxa de perda $p$, independente do tamanho da janela $W$.
 
@@ -340,21 +340,37 @@ Nas capturas Wireshark do cenário R2 (25\% de reordenação), esse comportament
 
 \noindent \textbf{Comportamento do Selective Repeat (SR)}:
 \\
-O receptor SR mantém um buffer interno indexado por número de sequência. Ao receber um pacote dentro da janela corrente — mesmo que fora de ordem —, ele o armazena no buffer e envia um ACK individual confirmando exatamente aquele pacote. A janela de recepção só avança quando os pacotes contíguos a partir do início da janela estiverem todos presentes no buffer (\textit{flush} em ordem para a aplicação).
+O receptor SR mantém um buffer interno indexado por número de sequência. Ao receber um pacote dentro da janela corrente, mesmo que fora de ordem, ele o armazena no buffer e envia um ACK individual confirmando exatamente aquele pacote. A janela de recepção só avança quando os pacotes contíguos a partir do início da janela estiverem todos presentes no buffer (\textit{flush} em ordem para a aplicação).
 
 Nas capturas Wireshark do cenário R2, observa-se que o SR emite ACKs para pacotes fora de ordem sem gerar retransmissões imediatas. Quando o pacote ausente eventualmente chega (ou é retransmitido por timeout individual), a janela avança de uma vez e os dados são entregues em ordem à aplicação. Isso resulta em throughput substancialmente superior ao GBN sob reordenação, pois o trabalho de entrega dos pacotes fora de ordem não é desperdiçado.
+
+\begin{table}[H]
+    \centering
+    \caption{Custo de Retransmissões: GBN vs SR sob Reordenação}
+    \begin{tabularx}{\textwidth}{c*{4}{Y}}
+        \toprule
+        \textbf{Cenário} & \textbf{Go-Back-N ($W=4$)} & \textbf{Go-Back-N ($W=16$)} & \textbf{Selective Repeat ($W=4$)} & \textbf{Selective Repeat ($W=16$)} \\
+        \midrule
+        R1 (10\%) & 1.760  & 25.962 & 2 & 1  \\
+        R2 (25\%) & 3.758  & 36.561 & 1 & 17 \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:comparativo_reordenacao}
+\end{table}
+
+\noindent Os dados confirmam o comportamento teórico: sob R2 com $W=16$, o GBN registrou \textbf{36.561 retransmissões} contra apenas \textbf{17 do SR}, uma diferença de mais de 2.000 vezes. No SR, pacotes fora de ordem são bufferizados e não geram retransmissões imediatas, enquanto no GBN cada reordenação dispara o reenvio de toda a janela.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{capturas/gbn_reorder_wireshark.png}
-    \caption{Captura Wireshark — GBN sob reordenação R2: descarte de pacotes fora de ordem e retransmissão em lote a partir da base da janela.}
+    \caption{Captura Wireshark: GBN sob reordenação R2 - descarte de pacotes fora de ordem e retransmissão em lote a partir da base da janela.}
     \label{fig:gbn_reorder}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{capturas/sr_reorder_wireshark.png}
-    \caption{Captura Wireshark — SR sob reordenação R2: bufferização de pacotes fora de ordem, ACKs individuais e entrega em ordem após preenchimento das lacunas.}
+    \caption{Captura Wireshark: SR sob reordenação R2 - bufferização de pacotes fora de ordem, ACKs individuais e entrega em ordem após preenchimento das lacunas.}
     \label{fig:sr_reorder}
 \end{figure}
 
@@ -374,22 +390,18 @@ Para o GBN, uma janela maior representa um custo de retransmissão proporcionalm
 \\
 No SR, independentemente do tamanho da janela, apenas os pacotes efetivamente perdidos são retransmitidos. Uma janela maior no SR traz somente benefícios: maior throughput potencial sem aumento proporcional no custo de retransmissão. Por isso, o SR com $W = 16$ domina o GBN com $W = 16$ em praticamente todos os cenários com perda ou reordenação.
 
-\newpage
-
 % ================= SEÇÃO 4 =================
 \section{Conclusão}
 
 Este trabalho projetou, implementou e analisou experimentalmente o protocolo SRTP em três variantes de controle de fluxo. Os dados coletados permitem tirar conclusões objetivas sobre quando cada abordagem é mais adequada.
 
-\noindent \textbf{Stop-and-Wait (SAW)} — recomendado para canais de \emph{baixíssima latência e sem perda}. A análise da Parte 1 demonstrou que o SAW é devastadoramente sensível ao RTT: em L3 (150 ms de latência de ida), o throughput caiu para $0{,}80$ KB/s — mais de 2700 vezes abaixo da baseline L0 ($2166$ KB/s). O mecanismo de timeout fixo de 100 ms provoca retransmissões espúrias sempre que o RTT excede esse limiar. Para redes locais com RTT inferior a 1 ms e taxa de perda inferior a 1\%, o SAW oferece simplicidade de implementação sem perda perceptível de desempenho.
+\noindent \textbf{Stop-and-Wait (SAW)}: recomendado para canais de \emph{baixíssima latência e sem perda}. A análise da Parte 1 demonstrou que o SAW é devastadoramente sensível ao RTT: em L3 (150 ms de latência de ida), o throughput caiu para $0{,}80$ KB/s, mais de 2700 vezes abaixo da baseline L0 ($2166$ KB/s). O mecanismo de timeout fixo de 100 ms provoca retransmissões espúrias sempre que o RTT excede esse limiar. Para redes locais com RTT inferior a 1 ms e taxa de perda inferior a 1\%, o SAW oferece simplicidade de implementação sem perda perceptível de desempenho.
 
-\noindent \textbf{Go-Back-N (GBN)} — recomendado para canais de \emph{alta latência e baixa perda}, onde a simplicidade do receptor é uma vantagem. A janela deslizante do GBN elimina o gargalo de um pacote por RTT, aumentando o throughput proporcionalmente a $W$ em canais limpos. Contudo, o custo de retransmissão em lote torna o GBN ineficiente sob perda elevada (P3, P4) ou reordenação: cada evento de perda/reordenação força o reenvio de toda a janela, incluindo pacotes que o receptor já recebeu corretamente mas descartou. A vantagem do GBN está em seu receptor mais simples: nenhum buffer fora de ordem é necessário, o que reduz a complexidade de implementação.
+\noindent \textbf{Go-Back-N (GBN)}: recomendado para canais de \emph{alta latência e baixa perda}, onde a simplicidade do receptor é uma vantagem. A janela deslizante do GBN elimina o gargalo de um pacote por RTT, aumentando o throughput proporcionalmente a $W$ em canais limpos. Contudo, o custo de retransmissão em lote torna o GBN ineficiente sob perda elevada (P3, P4) ou reordenação: cada evento de perda/reordenação força o reenvio de toda a janela, incluindo pacotes que o receptor já recebeu corretamente mas descartou. A vantagem do GBN está em seu receptor mais simples: nenhum buffer fora de ordem é necessário, o que reduz a complexidade de implementação.
 
-\noindent \textbf{Selective Repeat (SR)} — recomendado como escolha padrão para \emph{redes com perda ou reordenação significativas}. O SR retransmite apenas o que é estritamente necessário, preservando o trabalho de entrega dos pacotes fora de ordem. Nos cenários de reordenação R1 e R2, o SR manteve throughput próximo ao de um canal sem perturbação, enquanto o GBN sofreu degradação severa. O custo adicional é um receptor mais complexo, que precisa manter um buffer indexado por número de sequência e gerenciar a montagem em ordem dos dados.
+\noindent \textbf{Selective Repeat (SR)}: recomendado como escolha padrão para \emph{redes com perda ou reordenação significativas}. O SR retransmite apenas o que é estritamente necessário, preservando o trabalho de entrega dos pacotes fora de ordem. Nos cenários de reordenação R1 e R2, o SR manteve throughput próximo ao de um canal sem perturbação, enquanto o GBN sofreu degradação severa. O custo adicional é um receptor mais complexo, que precisa manter um buffer indexado por número de sequência e gerenciar a montagem em ordem dos dados.
 
 Em síntese: SAW para simplicidade em redes ideais; GBN para alta latência com baixa perda e receptor simples; SR como protocolo robusto para condições reais de rede com perda e reordenação.
-\newpage
-
 % ================= REFERÊNCIAS =================
 \section*{Referências}
 \addcontentsline{toc}{section}{Referências}
@@ -398,8 +410,8 @@ Em síntese: SAW para simplicidade em redes ideais; GBN para alta latência com 
   \item KUROSE, James F.; ROSS, Keith W. \textbf{Redes de Computadores e a Internet: Uma abordagem top-down}. 8. ed. São Paulo: Pearson, 2021.
   \item FOROUZAN, Behrouz A. \textbf{Comunicação de Dados e Redes de Computadores}. 4. ed. Porto Alegre: McGraw-Hill, 2008.
   \item PETERSON, Larry L.; DAVIE, Bruce S. \textbf{Computer Networks: A Systems Approach}. 6. ed. Elsevier, 2022. Disponível em: \url{https://book.systemsapproach.org}.
-  \item JAGT, Erik. \textbf{clumsy — An utility for simulating network conditions on Windows}. GitHub, 2014. Disponível em: \url{https://github.com/jagt/clumsy}.
-  \item PYTHON SOFTWARE FOUNDATION. \textbf{socket — Low-level networking interface}. Python 3 Documentation. Disponível em: \url{https://docs.python.org/3/library/socket.html}.
+  \item JAGT, Erik. \textbf{clumsy: An utility for simulating network conditions on Windows}. GitHub, 2014. Disponível em: \url{https://github.com/jagt/clumsy}.
+  \item PYTHON SOFTWARE FOUNDATION. \textbf{socket: Low-level networking interface}. Python 3 Documentation. Disponível em: \url{https://docs.python.org/3/library/socket.html}.
 \end{enumerate}
 
 \end{document}
