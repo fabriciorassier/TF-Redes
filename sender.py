@@ -267,7 +267,10 @@ def run_sender(host, port, filepath, mode, window):
         elif mode == "sr":
             send_sr(sock_data, sock_ack, peer_addr, port + 1, file_data, negotiated_window, stats)
 
-        teardown_active(sock_data, sock_ack, peer_addr)
+        try:
+            teardown_active(sock_data, sock_ack, peer_addr)
+        except ConnectionError:
+            print("[SENDER] Warning: teardown timeout (alta perda), dados transferidos com sucesso.")
         print("[SENDER] Transfer complete.")
         stats.report()
 
