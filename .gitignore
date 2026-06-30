@@ -11,6 +11,9 @@ arquivo_teste.bin
 recv_out.txt
 recv_err.txt
 
+# Capturas Wireshark (grandes demais para git)
+capturas/*.pcapng
+
 # Planejamento interno
 image.png
 *.pdf
