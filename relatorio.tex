@@ -274,10 +274,10 @@ A tabela abaixo compara o throughput medido dos três protocolos sob as diferent
         \toprule
         \textbf{Cenário} & \textbf{Stop-and-Wait (SAW)} & \textbf{Go-Back-N ($W=4$)} & \textbf{Go-Back-N ($W=16$)} & \textbf{Selective Repeat ($W=16$)} \\
         \midrule
-        L0 & & & & \\
-        L1 & & & & \\
-        L2 & & & & \\
-        L3 & & & & \\
+        L0 & 51.40  & 160.03  & 431.84  & 419.04 \\
+        L1 & 1.37   & 5.92    & 21.39   & 23.38  \\
+        L2 & 1.10   & 4.26    & 16.99   & 18.04  \\
+        L3 & --     & 2.78    & 10.74   & 11.22  \\
         \bottomrule
     \end{tabularx}
     \label{tab:comparativo_latencia}
@@ -310,10 +310,10 @@ A perda de pacotes impacta de formas muito distintas o GBN (onde uma perda forç
         \toprule
         \textbf{Cenário} & \textbf{Go-Back-N ($W=4$)} & \textbf{Go-Back-N ($W=16$)} & \textbf{Selective Repeat ($W=4$)} & \textbf{Selective Repeat ($W=16$)} \\
         \midrule
-        P1 & & & & \\
-        P2 & & & & \\
-        P3 & & & & \\
-        P4 & & & & \\
+        P1 & 380    & 7.296   & 50    & 60    \\
+        P2 & 1.572  & 17.180  & 291   & 260   \\
+        P3 & 2.227  & N/D     & 633   & 616   \\
+        P4 & 4.652  & 36.048  & 2.291 & 2.271 \\
         \bottomrule
     \end{tabularx}
     \label{tab:comparativo_perdas}
