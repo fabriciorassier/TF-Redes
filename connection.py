@@ -47,9 +47,9 @@ def handshake_active(sock_send, sock_recv, host, port, window):
         syn, fin, seq, ack_flag, nack, ack, their_window, payload = pkt
         if syn == 1 and ack_flag == 1:
             negotiated = min(window, their_window)
-            # Send ACK to confirm
+            # Send ACK from sock_recv (port+1) to open NAT mapping for ACK channel
             ack_pkt = make_packet(ack_flag=1, ack=0)
-            sock_send.sendto(ack_pkt, addr)
+            sock_recv.sendto(ack_pkt, addr)
             return negotiated, addr
 
     raise ConnectionError("Handshake failed: no SYN+ACK received")
