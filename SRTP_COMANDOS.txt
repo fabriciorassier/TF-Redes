@@ -1,0 +1,81 @@
+========================================================================
+ CARTAO DE COMANDOS - TESTE SRTP (deixe este arquivo aberto na aula)
+========================================================================
+
+ REGRA DE OURO:
+   - Quem RECEBE tem "--listen". Roda PRIMEIRO. Fica esperando.
+   - Quem ENVIA tem "--host <IP-do-outro>" e "--file". Roda DEPOIS.
+   - --port e --mode tem que ser IGUAIS nos dois lados.
+   - Windows usa "python".  Mac/Linux usa "python3".
+
+------------------------------------------------------------------------
+ PASSO 0 - DESCOBRIR O IP DE CADA MAQUINA
+------------------------------------------------------------------------
+ Windows:  ipconfig            -> "Endereco IPv4" (ex: 192.168.0.55)
+ Mac:      ifconfig | grep "inet "   -> o 192.168.x.x
+ Linux:    ip addr              -> o 192.168.x.x
+
+   MEU IP:    ________________
+   IP DELES:  ________________
+
+------------------------------------------------------------------------
+ PASSO 1 - LIBERAR FIREWALL (so no Windows) - PowerShell como ADMIN
+------------------------------------------------------------------------
+ netsh advfirewall firewall add rule name="SRTP-UDP-in" dir=in action=allow protocol=UDP localport=6000-6001
+
+ (se ainda falhar, desligue temporario e RELIGUE depois:)
+ netsh advfirewall set privatefirewall state off
+ ...   netsh advfirewall set privatefirewall state on
+
+------------------------------------------------------------------------
+ PASSO 2 - TESTAR A REDE (nao o SRTP ainda) - netcheck
+------------------------------------------------------------------------
+ Quem vai receber:
+   python netcheck.py --listen --port 6000
+ Quem vai enviar (troque pelo IP do outro):
+   python netcheck.py --host IP_DO_OUTRO --port 6000
+
+ -> Deu "SUCESSO"? A rede libera. Pode ir pro SRTP.
+ -> Deu "FALHA"?    E firewall ou isolamento de rede. Resolva antes.
+
+========================================================================
+ COMANDOS SRTP
+========================================================================
+
+------------------------------------------------------------------------
+ QUANDO EU RECEBO  (rodo primeiro)
+------------------------------------------------------------------------
+ SAW:  python srtp.py --listen --port 6000 --mode saw --output recebido.bin
+ GBN:  python srtp.py --listen --port 6000 --mode gbn --window 16 --output recebido.bin
+ SR:   python srtp.py --listen --port 6000 --mode sr  --window 16 --output recebido.bin
+
+------------------------------------------------------------------------
+ QUANDO EU ENVIO  (rodo depois; --host = IP DO OUTRO)
+------------------------------------------------------------------------
+ SAW:  python srtp.py --host IP_DO_OUTRO --port 6000 --mode saw --file arquivo_teste.bin
+ GBN:  python srtp.py --host IP_DO_OUTRO --port 6000 --mode gbn --window 16 --file arquivo_teste.bin
+ SR:   python srtp.py --host IP_DO_OUTRO --port 6000 --mode sr  --window 16 --file arquivo_teste.bin
+
+ ATENCAO: no ENVIO e "--file" (o que mando). "--output" NAO existe no envio.
+
+------------------------------------------------------------------------
+ CONFERIR SE DEU CERTO (na maquina que recebeu)
+------------------------------------------------------------------------
+ Mac/Linux:  shasum -a 256 recebido.bin
+ Windows:    Get-FileHash recebido.bin -Algorithm SHA256
+ -> Compare com o hash do arquivo original. Iguais = sucesso.
+
+========================================================================
+ ORDEM RECOMENDADA NA AULA
+========================================================================
+ 1. Todos no MESMO hotspot/WiFi. Anote os IPs (Passo 0).
+ 2. Libere firewall no Windows (Passo 1).
+ 3. netcheck entre as maquinas (Passo 2). So siga se der SUCESSO.
+ 4. Comece por --mode saw. Uma direcao, confira hash.
+ 5. Inverta a direcao (quem enviou agora recebe), confira hash.
+ 6. Se o saw passou e sobrar tempo: tente gbn e sr (janela IGUAL nos dois lados).
+
+ Combine com o outro grupo: MESMA porta, MESMO modo, MESMA janela.
+ A sintaxe do programa DELES pode ser diferente - nao importa.
+ So os pacotes na rede precisam bater (todos seguiram o mesmo enunciado).
+========================================================================
